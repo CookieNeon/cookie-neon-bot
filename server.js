@@ -1,40 +1,38 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const path = require("path");
 const TelegramBot = require("node-telegram-bot-api");
 
+require("dotenv").config();
+
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+const TOKEN = process.env.BOT_TOKEN;
 
-// ✅ Sert les fichiers statiques depuis /public
-app.use(express.static("public"));
+// Crée le bot (en mode webhook)
+const bot = new TelegramBot(TOKEN, { polling: false });
 
-// Middleware pour parser JSON
+// Middlewares
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "public"))); // sert tout le dossier public
 
-// Ton token Telegram (⚠️ sécurise-le via Render Environment Variables)
-const token = process.env.TELEGRAM_TOKEN || "TON_TOKEN_ICI";
-const bot = new TelegramBot(token, { polling: false });
+// ✅ Route pour ton jeu
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
-// ✅ Route webhook pour Telegram
+// ✅ Route webhook Telegram
 app.post("/webhook", (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
 });
 
-// ✅ Petite route test pour vérifier que le serveur tourne
-app.get("/", (req, res) => {
+// ✅ Route test simple
+app.get("/ping", (req, res) => {
   res.send("✅ Cookie Neon Bot est en ligne !");
 });
 
-// ✅ Exemple basique de réponse au /start
-bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(
-    msg.chat.id,
-    "👋 Bienvenue dans le Cookie Neon Bot ! Clique ici pour jouer : https://cookie-neon-bot.onrender.com/index.html"
-  );
-});
-
-// Lancer serveur
-app.listen(port, () => {
-  console.log(`🚀 Serveur en ligne sur http://localhost:${port}`);
+// Lancer le serveur
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur en ligne sur le port ${PORT}`);
 });
