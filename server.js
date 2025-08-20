@@ -1,42 +1,29 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const path = require("path");
-const db = require("./db");
-require("./bot"); // lance aussi le bot Telegram
+const bodyParser = require("body-parser");
+require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Dossier public pour les fichiers statiques (HTML, CSS, JS, images)
 app.use(express.static(path.join(__dirname, "public")));
 
+// Route principale → index.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.post("/play", (req, res) => {
-  const { userId } = req.body;
-  db.updateScore(userId, 1, (err) => {
-    if (err) return res.status(500).json({ error: err });
-    db.getUser(userId, (err2, user) => {
-      res.json({ score: user.score });
-    });
-  });
+// Exemple API pour le bot (tu pourras modifier/ajouter tes endpoints ici)
+app.get("/api/status", (req, res) => {
+  res.json({ status: "✅ Cookie Neon Bot en ligne !" });
 });
 
-app.post("/bonus", (req, res) => {
-  const { userId } = req.body;
-  db.dailyBonus(userId, (err, given) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json({ bonusGiven: given });
-  });
+// Lancer serveur
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
 });
-
-app.get("/leaderboard", (req, res) => {
-  db.getLeaderboard((err, rows) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json(rows);
-  });
-});
-
-app.listen(PORT, () => console.log(`🚀 Cookie Neon Bot online sur port ${PORT}`));
