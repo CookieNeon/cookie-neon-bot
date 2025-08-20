@@ -3,143 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍪 Tap Tap Cookie</title>
-  <style>
-    body {
-      font-family: "Arial", sans-serif;
-      text-align: center;
-      background: linear-gradient(135deg, #f8d49d, #f39c12);
-      margin: 0;
-      padding: 0;
-    }
-
-    h1 {
-      margin-top: 20px;
-      font-size: 2.5rem;
-      color: #6b4226;
-    }
-
-    #cookie {
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      margin: 20px auto;
-      cursor: pointer;
-      background: url("https://upload.wikimedia.org/wikipedia/commons/6/69/Chocolate_Chip_Cookie.png") no-repeat center;
-      background-size: cover;
-      box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-      transition: transform 0.1s ease;
-    }
-
-    #cookie:active {
-      transform: scale(0.9);
-    }
-
-    #score {
-      font-size: 2rem;
-      margin: 10px;
-      color: #fff;
-      font-weight: bold;
-    }
-
-    #shop {
-      background: #fff3e0;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 400px;
-      margin: 20px auto;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-
-    .upgrade {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 10px 0;
-      padding: 10px;
-      background: #f39c12;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-
-    .upgrade:hover {
-      background: #d35400;
-    }
-
-    footer {
-      margin-top: 20px;
-      color: #fff;
-    }
-  </style>
+  <title>Cookie Neon Bot - Jeu TapTap</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>🍪 Tap Tap Cookie</h1>
-  <div id="cookie"></div>
-  <div id="score">Cookies : 0</div>
+  <h1>🍪 Cookie Neon Bot</h1>
+  <p>Clique sur le bouton pour gagner des points !</p>
 
-  <div id="shop">
-    <h2>🛒 Boutique</h2>
-    <div id="upgrade1" class="upgrade">👆 +1 cookie par clic (Coût : 50)</div>
-    <div id="upgrade2" class="upgrade">🤖 Auto-clicker (Coût : 100)</div>
-  </div>
+  <button id="tapButton">Tap Tap!</button>
+  <p>Score : <span id="score">0</span></p>
 
-  <footer>Fais exploser ton compteur de cookies 😋</footer>
-
-  <script>
-    let score = 0;
-    let cookiesPerClick = 1;
-    let autoClickers = 0;
-
-    const cookie = document.getElementById("cookie");
-    const scoreDisplay = document.getElementById("score");
-    const upgrade1 = document.getElementById("upgrade1");
-    const upgrade2 = document.getElementById("upgrade2");
-
-    // 🎯 Clique sur le cookie
-    cookie.addEventListener("click", () => {
-      score += cookiesPerClick;
-      updateScore();
-    });
-
-    // 👆 Upgrade 1 : +1 par clic
-    upgrade1.addEventListener("click", () => {
-      if (score >= 50) {
-        score -= 50;
-        cookiesPerClick++;
-        updateScore();
-        alert("Tu gagnes +1 cookie par clic !");
-      } else {
-        alert("Pas assez de cookies !");
-      }
-    });
-
-    // 🤖 Upgrade 2 : Auto-click
-    upgrade2.addEventListener("click", () => {
-      if (score >= 100) {
-        score -= 100;
-        autoClickers++;
-        updateScore();
-        alert("Un auto-clicker travaille pour toi !");
-      } else {
-        alert("Pas assez de cookies !");
-      }
-    });
-
-    // ⚡ Auto-clickers toutes les secondes
-    setInterval(() => {
-      if (autoClickers > 0) {
-        score += autoClickers;
-        updateScore();
-      }
-    }, 1000);
-
-    // 🔄 Mise à jour affichage
-    function updateScore() {
-      scoreDisplay.textContent = `Cookies : ${score}`;
-    }
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
