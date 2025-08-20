@@ -1,41 +1,36 @@
-import { Telegraf } from "telegraf";
+import TelegramBot from "node-telegram-bot-api";
+import express from "express";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const app = express();
+const PORT = process.env.PORT || 3000;
+const TOKEN = process.env.BOT_TOKEN;
+const URL = process.env.RENDER_EXTERNAL_URL; // ⚡ Render ajoute cette variable automatiquement
 
-// 🚀 Commande /start
-bot.start((ctx) => {
-  ctx.reply(
-    `Bienvenue ${ctx.from.first_name} 👋\n\nClique sur 🚀 pour jouer à CookieNeonBot !`,
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "🚀 Ouvrir le jeu",
-              web_app: { url: process.env.PUBLIC_BASE_URL }
-            }
-          ]
-        ]
-      }
-    }
-  );
+// Créer bot sans polling
+const bot = new TelegramBot(TOKEN, { polling: false });
+
+// Middleware pour JSON
+app.use(express.json());
+
+// Endpoint pour Telegram (reçoit les updates)
+app.post(`/bot${TOKEN}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
 });
 
-// ✅ Commande /test
-bot.command("test", (ctx) => {
-  ctx.reply("✅ Bot & serveur sont en ligne !");
+// Lancer serveur
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+
+  // Définir webhook sur l’URL Render
+  bot.setWebHook(`${URL}/bot${TOKEN}`);
+  console.log(`🤖 Webhook configuré sur ${URL}/bot${TOKEN}`);
 });
 
-// Écoute des erreurs
-bot.catch((err, ctx) => {
-  console.error(`❌ Erreur pour ${ctx.updateType}`, err);
-  ctx.reply("⚠️ Une erreur est survenue !");
+// Exemple commande
+bot.onText(/\/start/, (msg) => {
+  bot.sendMessage(msg.chat.id, "👋 Hello ! Ton bot tourne avec Render 🚀");
 });
-
-// Démarrage du bot
-bot.launch();
-console.log("🤖 Bot Telegram lancé avec succès !");
-
