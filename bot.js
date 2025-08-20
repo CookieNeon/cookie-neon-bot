@@ -1,36 +1,44 @@
-import TelegramBot from "node-telegram-bot-api";
-import express from "express";
-import dotenv from "dotenv";
+const TelegramBot = require("node-telegram-bot-api");
+const db = require("./db");
 
-dotenv.config();
+const token = process.env.BOT_TOKEN; // à définir sur Render
+const bot = new TelegramBot(token, { polling: true });
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-const TOKEN = process.env.BOT_TOKEN;
-const URL = process.env.RENDER_EXTERNAL_URL; // ⚡ Render ajoute cette variable automatiquement
+bot.onText(/\/start(?:\s+(\S+))?/, (msg, match) => {
+  const chatId = msg.chat.id.toString();
+  const username = msg.from.username || `user${chatId}`;
+  const referrerId = match[1];
 
-// Créer bot sans polling
-const bot = new TelegramBot(TOKEN, { polling: false });
+  db.addUser(chatId, username, () => {
+    if (referrerId && referrerId !== chatId) {
+      db.addReferral(referrerId, chatId, () => {
+        bot.sendMessage(chatId, "Tu as rejoint via un lien d’invitation 🎉");
+        bot.sendMessage(referrerId, `Ton ami @${username} t’a rapporté +100 points !`);
+      });
+    }
+  });
 
-// Middleware pour JSON
-app.use(express.json());
-
-// Endpoint pour Telegram (reçoit les updates)
-app.post(`/bot${TOKEN}`, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
+  bot.sendMessage(chatId, `Bienvenue @${username} 🎮\nJoue ici 👉 https://cookie-neon-bot.onrender.com`);
 });
 
-// Lancer serveur
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-
-  // Définir webhook sur l’URL Render
-  bot.setWebHook(`${URL}/bot${TOKEN}`);
-  console.log(`🤖 Webhook configuré sur ${URL}/bot${TOKEN}`);
+bot.onText(/\/score/, (msg) => {
+  const chatId = msg.chat.id.toString();
+  db.getUser(chatId, (err, user) => {
+    if (!user) return bot.sendMessage(chatId, "Aucun score trouvé.");
+    bot.sendMessage(chatId, `Ton score actuel est : ${user.score} 🍪`);
+  });
 });
 
-// Exemple commande
-bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id, "👋 Hello ! Ton bot tourne avec Render 🚀");
+bot.onText(/\/leaderboard/, (msg) => {
+  const chatId = msg.chat.id.toString();
+  db.getLeaderboard((err, rows) => {
+    if (err) return;
+    let text = "🏆 Classement :\n";
+    rows.forEach((u, i) => {
+      text += `#${i + 1} ${u.username || "Anonyme"} - ${u.score} pts\n`;
+    });
+    bot.sendMessage(chatId, text);
+  });
 });
+
+module.exports = bot;
