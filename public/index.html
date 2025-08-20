@@ -1,183 +1,63 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cookie Neon Bot</title>
+  <meta charset="UTF-8">
+  <title>🍪 Cookie Neon</title>
   <style>
     body {
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      flex-direction: column;
       font-family: Arial, sans-serif;
-      color: #00faff;
       text-align: center;
-      overflow: hidden;
+      background: #111;
+      color: #fff;
     }
     h1 {
-      font-size: 2.5em;
-      text-shadow: 0 0 10px #00faff, 0 0 20px #00faff;
+      margin-top: 30px;
+      color: #f5c542;
     }
-
-    /* COOKIE néon en SVG */
     #cookie {
-      width: 180px;
-      height: 180px;
-      margin: 20px;
+      width: 200px;
+      margin: 30px;
       cursor: pointer;
-      filter: drop-shadow(0 0 20px #00faff);
-      transition: transform 0.2s ease-in-out, filter 0.2s;
+      transition: transform 0.1s;
     }
     #cookie:active {
       transform: scale(0.9);
-      filter: drop-shadow(0 0 40px #00faff) brightness(1.5);
     }
-
     #score {
-      font-size: 1.5em;
-      margin-top: 20px;
-      color: #0ff;
-      text-shadow: 0 0 10px #00faff, 0 0 20px #00faff;
+      font-size: 24px;
+      margin: 20px 0;
     }
     button {
-      background: #00faff;
-      color: #000;
-      font-size: 1em;
       padding: 10px 20px;
-      margin-top: 10px;
+      font-size: 18px;
+      background: #f542dd;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
+      color: white;
       cursor: pointer;
-      box-shadow: 0 0 15px #00faff;
-      transition: all 0.2s;
-    }
-    button:hover {
-      background: #00e6e6;
-      box-shadow: 0 0 25px #00faff;
-    }
-    #leaderboard {
-      margin-top: 30px;
-      text-align: left;
-      color: #0ff;
-    }
-    #leaderboard h2 {
-      text-align: center;
-      text-shadow: 0 0 15px #00faff;
-    }
-
-    /* Effet +1 animé */
-    .floating {
-      position: absolute;
-      color: #00faff;
-      font-size: 20px;
-      text-shadow: 0 0 10px #00faff, 0 0 20px #00faff;
-      animation: floatUp 1s ease-out forwards;
-      pointer-events: none;
-    }
-    @keyframes floatUp {
-      from { opacity: 1; transform: translateY(0); }
-      to { opacity: 0; transform: translateY(-80px); }
     }
   </style>
 </head>
 <body>
-  <h1>🍪 Cookie Neon 🚀</h1>
-
-  <!-- ✅ Cookie SVG bleu néon -->
-  <svg id="cookie" viewBox="0 0 200 200">
-    <circle cx="100" cy="100" r="90" fill="#003366" stroke="#00faff" stroke-width="5"/>
-    <!-- Pépites -->
-    <circle cx="70" cy="70" r="10" fill="#00faff"/>
-    <circle cx="120" cy="60" r="8" fill="#00faff"/>
-    <circle cx="140" cy="120" r="9" fill="#00faff"/>
-    <circle cx="80" cy="130" r="7" fill="#00faff"/>
-    <circle cx="110" cy="150" r="6" fill="#00faff"/>
-  </svg>
-
-  <div id="score">Score: 0</div>
-  <button onclick="resetScore()">🔄 Reset</button>
-  <button onclick="shareReferral()">🔗 Partager mon lien</button>
-
-  <div id="leaderboard">
-    <h2>🏆 Classement</h2>
-    <ul id="scoresList"></ul>
-  </div>
+  <h1>🍪 Cookie Neon</h1>
+  <p id="score">Score: 0</p>
+  <img id="cookie" src="https://upload.wikimedia.org/wikipedia/commons/7/70/Cookie.png" alt="cookie">
+  <br>
+  <button onclick="resetGame()">🔄 Réinitialiser</button>
 
   <script>
-    // --- Nom du joueur
-    const urlParams = new URLSearchParams(window.location.search);
-    let referrer = urlParams.get("ref");
-    let player = localStorage.getItem("player");
-
-    if (!player) {
-      player = "Joueur" + Math.floor(Math.random()*1000);
-      localStorage.setItem("player", player);
-
-      if (referrer) {
-        fetch("/api/referral", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ referrer })
-        });
-      }
-    }
-
-    let score = parseInt(localStorage.getItem("score")) || 0;
+    let score = 0;
     const scoreEl = document.getElementById("score");
-    const cookie = document.getElementById("cookie");
+    const cookieEl = document.getElementById("cookie");
 
-    scoreEl.textContent = "Score: " + score;
-
-    cookie.addEventListener("click", (e) => {
+    cookieEl.addEventListener("click", () => {
       score++;
       scoreEl.textContent = "Score: " + score;
-      localStorage.setItem("score", score);
-
-      // Effet +1
-      const plusOne = document.createElement("div");
-      plusOne.textContent = "+1";
-      plusOne.className = "floating";
-      document.body.appendChild(plusOne);
-      plusOne.style.left = e.pageX + "px";
-      plusOne.style.top = e.pageY + "px";
-      setTimeout(() => plusOne.remove(), 1000);
-
-      // Envoi au serveur
-      fetch("/api/score", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ player, score })
-      });
     });
 
-    function resetScore() {
+    function resetGame() {
       score = 0;
-      scoreEl.textContent = "Score: " + score;
-      localStorage.setItem("score", score);
-    }
-
-    async function loadLeaderboard() {
-      const res = await fetch("/api/leaderboard");
-      const data = await res.json();
-      const list = document.getElementById("scoresList");
-      list.innerHTML = "";
-      data.forEach((p, i) => {
-        list.innerHTML += `<li>#${i+1} ${p.player} — ${p.score}</li>`;
-      });
-    }
-
-    setInterval(loadLeaderboard, 5000);
-    loadLeaderboard();
-
-    function shareReferral() {
-      const link = `${window.location.origin}?ref=${player}`;
-      navigator.clipboard.writeText(link).then(() => {
-        alert("🔗 Ton lien de parrainage a été copié : " + link);
-      });
+      scoreEl.textContent = "Score: 0";
     }
   </script>
 </body>
