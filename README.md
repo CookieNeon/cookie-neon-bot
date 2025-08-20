@@ -65,3 +65,4 @@ cookie-neon-bot/
 ## Licence
 MIT. Utilisez et modifiez librement.
 # Cookie-Neon
+# cookie-neon-bottt
