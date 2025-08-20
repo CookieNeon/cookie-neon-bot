@@ -1,6 +1,7 @@
 {
   "name": "cookie-neon-bot",
   "version": "1.0.0",
+  "description": "Bot Cookie Neon avec serveur web, parrainage et sauvegarde SQLite",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -8,7 +9,20 @@
   },
   "dependencies": {
     "express": "^4.18.2",
+    "body-parser": "^1.20.2",
     "sqlite3": "^5.1.6",
-    "body-parser": "^1.20.2"
-  }
+    "dotenv": "^16.3.1",
+    "node-telegram-bot-api": "^0.63.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
+  "keywords": [
+    "telegram-bot",
+    "cookie-neon",
+    "express",
+    "sqlite"
+  ],
+  "author": "DMRW",
+  "license": "MIT"
 }
